@@ -18,3 +18,7 @@ The interpolation threshold occurs at $N \approx n*k$ where $N$ denotes the numb
 * "*For the classes HN that we consider, there is no guarantee that the most regular, smallest norm predictor consistent with training data (namely hn,∞, which is in H∞) is contained in the class HN for any finite N. But increasing N allows us to construct progressively better approximations to that smallest norm function. Thus we expect to have learned predictors with largest norm at the interpolation threshold and for the norm of hn,N to decrease monotonically as N increases thus explaining the second descent segment of the curve.*"
 
 ![](2022-09-25-11-21-40.png)
+
+# Questions
+* Why do lower norm solutions generalize better? I.e. What is the mathematical version of Okhams razor
+* How exactly does this seeking of lower norm solutions happen, why dont we see ourselves stuck in random local minima?
