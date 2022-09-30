@@ -1,3 +1,25 @@
+
+# Why are over-parameterized networks able to generalize?
+
+In recent years we have seen an explosion in the number of model parameters in state of the art DL approaches. While [AlexNet](https://papers.nips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf) in 2012 has ~60 million parameters, more recent models like a GPT-3 have a count of 175 billion parameters and there is a common intuition that larger models are generally better at generalizing. This intuition, however, is at odds with a "classical" statistical understanding of approximating a distribution using a finite amount of (noisy) samples. From the latter one would expect that increasing the parameter count of a model beyond a certain point will hurt generalization. 
+
+So,
+* Does ML and DL in particular indeed render the conventional view as outdated?
+* How do we systematically study this alleged behaviour?
+* What are the mechanisms which could give raise to this observation?
+
+# Classical understanding
+The goal of machine learning or statistical learning theory is to approximate an unknown distribution $M^*$ using a finite set of training data sampled from $M^*$. Different approaches usually differ in the choice of the function space $M_{\theta}$ one uses to search for a candidate model and how one defines the distance measure which determines what is considered a good fit.
+|![](2022-09-30-11-59-12.png)|
+|:--:| 
+| *Schematic illustration of a situation where the function space is not expressive enough to model the true distribution $M^*$. The closest approximation $M^*_{\theta}$ is found via optimization methods starting at some initial choice of model parameters $M_{\theta_0}$. [Source](https://mml-book.github.io/)* |
+
+The "textbook" understanding is that the complexity of the model used to approximate the true distribution needs to be "just right". If there are too few free parameters in the model, no matter how you tune the parameters, the predictive power of the model is too limited i.e we are under-fitting. On the other end, if there are too many parameters, we are able to perfectly able to fit every sample in the training data at the cost of generalization as we are also fitting noise i.e. we are over-fitting. Furthermore, in the latter case there is not a unique solution and there are many possible ways to fit the training data perfectly. 
+The following figure illustrates these different scenarios using n-degree polynomials as $M_{\theta}$ 
+|![](2022-09-30-19-28-09.png)|
+|:--:|
+|*[Source](https://mml-book.github.io/)*|
+
 # Why are neural networks able to generalize?
 * while deep learning made in the last ten years there are still some open major questions around the theoretical foundations. 
 * We need to take a "computational science" approach to study emerging properties from complex systems by simulating them
