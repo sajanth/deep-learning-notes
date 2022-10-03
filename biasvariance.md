@@ -10,7 +10,7 @@ So,
 ed behaviour?
 * What are the mechanisms which could give raise to this observation?
 
-# Classical statistics point-of-view
+# Bias and Variance
 The goal of machine learning or statistical learning theory is to approximate an unknown distribution $M^*$ using a finite set of training data sampled from $M^*$. Different approaches usually differ in the choice of the function space $M_{\theta}$ one uses to search for a candidate model and how one defines the distance measure which determines what is considered a good fit.
 |![](2022-09-30-11-59-12.png)|
 |:--:| 
@@ -30,7 +30,38 @@ These three regimes are summarised in more general way in the following figure
 
 Given this conventional understanding of how model complexity is expected to influence generalizability, how is the success of modern deep learning architectures, which are often over-parameterized (i.e. number of training samples $\ll$ number of weights) to be understood?
 
-# Double-descent phenomeon 
+> **Use of the term "Classical"** Note that we the fact that deep learning seems to go beyond this classical schematic doesn't imply that 'classical' statistics is wrong in some sense (what would that even mean?), but rather that modern machine learning has some additional structure and mechanisms which limit the applicability of the classical view.
+
+# Double-descent phenomenon
+In [Belkin et al. (2018)](https://arxiv.org/abs/1812.11118) the authors study the above discussed phenomenon systematically using primarily Kernel-based methods ([Random Fourier Features](https://gregorygundersen.com/blog/2019/12/23/random-fourier-features/) in particular) and they propose an extension of the classical picture to an *over-parameterized* regime
+
+|![](2022-09-25-11-17-02.png)|
+|:--:|
+|Extension of classical bias-variance picture to a "modern" over-parameterized regime. The interpolation threshold corresponds to the point where the model complexity matches the number of training samples. *[Source](https://arxiv.org/abs/1812.11118)*|
+
+With this picture, the loss on the test set peaks at the "interpolation threshold" and then monotonically decreases. The interpolation threshold corresponds to the point where the number of model parameters matches the number of training samples (or for classification: number of training samples $\times$ number of classes). This is the first time where the model complexity of $\mathcal{H}$ is large enough to perfectly fit all the training samples (hence "interpolation").
+Most importantly the loss beyond the interpolation threshold reaches values *lower* than the minimum in the classical picture.
+
+The double-descent phenomenon is studied in more generality in [Nakkiran et al. (2019)](https://arxiv.org/abs/1912.02292). In particular they introduce a more general notion of model complexity which goes beyond just the number of free parameters.
+
+>We define the **effective model complexity (EMC)** of a training procedure as the maximum number of samples on which it can achieve close to zero training error. The EMC depends not just on the data distribution and the architecture of the classifier but also on the training procedure—and in particular increasing training time will increase the EMC.
+
+With this notion of complexity, we expect to see a double-descent phenomenon along the dimension of model complexity as in number of parameters but also along the dimension of training time.
+
+|![](2022-10-03-20-13-27.png)|
+|:--:|
+|Experimental observation of the double descent phenomenon using CIFAR-10 on ResNet18 with varying width. The critical regime (orange) denotes a kind of 'potential barrier': If you find yourself in the minimum of the test error in the classical regime, increasing the number of parameters of your model will hurt your generalization performance while you are in this region. Furthermore, note that early stopping only makes sense for a given range of width values. *[Source](https://arxiv.org/abs/1912.02292)*|
+
+|![](2022-10-03-20-24-59.png)|
+|:--:|
+|Experimental observation of the double descent phenomenon along the training time dimension *[Source](https://arxiv.org/abs/1912.02292)*|
+
+Note that a corollary of the observed EMC scaling behaviour is that in certain regimes adding more data actually **hurts** your generalization performance! To see this, remember that EMC is defined as the number of training samples which can be exactly fitted. If we increase the number of training samples we consequently shift the interpolation threshold to the right, which will in some cases mean worse test error compared to a curve corresponding to a smaller train set.
+
+|![](2022-10-03-20-32-40.png)|
+|:--:|
+|Two different test loss as a function of embedding dimension (which corresponds to model complexity as in number of parameters) on a transformer model. The two curves differ in the number of training samples and illustrate a surprising case where increase training set size leads to worse test performance*[Source](https://arxiv.org/abs/1912.02292)*|
+
 # Why are neural networks able to generalize?
 * while deep learning made in the last ten years there are still some open major questions around the theoretical foundations. 
 * We need to take a "computational science" approach to study emerging properties from complex systems by simulating them
