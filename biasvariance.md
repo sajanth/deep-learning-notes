@@ -5,9 +5,7 @@ In recent years we have seen an explosion in the number of model parameters in s
 
 So,
 * Does ML and DL in particular indeed render the conventional view as outdated?
-* How do we systematically study this alleg
-
-ed behaviour?
+* How do we systematically study this alleged behaviour?
 * What are the mechanisms which could give raise to this observation?
 
 # Bias and Variance
@@ -62,41 +60,26 @@ Note that a corollary of the observed EMC scaling behaviour is that in certain r
 |:--:|
 |Two different test loss as a function of embedding dimension (which corresponds to model complexity as in number of parameters) on a transformer model. The two curves differ in the number of training samples and illustrate a surprising case where increase training set size leads to worse test performance*[Source](https://arxiv.org/abs/1912.02292)*|
 
-# Why are neural networks able to generalize?
-* while deep learning made in the last ten years there are still some open major questions around the theoretical foundations. 
-* We need to take a "computational science" approach to study emerging properties from complex systems by simulating them
-## Setup
-* In general machine learning the search for an "optimal" predictor within a class of models $\mathcal{H}$ is done via some optmization method
-* The "size" of $\mathcal{H}$ is considered key to find a good model. To small and the model is expected to underfit and too large and the model will fit the training data perfreclty while generalize poorly
-![](2022-09-25-11-16-33.png)
+While we now have seen ample evidence that indeed over-parameterized networks are able to reach better test errors, the question of *why* and *how* this is possible still remains. One intuition shared by both of the authors above is that since the interpolation threshold is the first point where we have enough complexity to perfectly fit the training data, going beyond this point will we be able to select from a wide variety of models which are able to perfectly fit the training data but also be a better approximation to the true distribution $M^*$. This raises two other questions though:
+* Given a set of models which fit the training set perfectly, in what sense can one to be expected to generalize better than the other?
+* What is the driving force or incentive during training to select such a solution as this selection starts to happen once the training error has *already* reached zero and remains there?
 
-* In deeplearing we deal with very large, over-parameterized models (#free parameters >> data points), however, even though they can fit the  training data at a near zero loss, such solutions seem to also generalize well to unseen data which is not what would be expect from conventional wisdom
-* This paper explores the question of how this is possible and what the underlying mechanics are which give raise to this phenomenon
+One plausible explication is that common training procedures implicitly harbour a type of bias or regularization mechanism which seek out those solutions in the loss landscape which generalize better. This 
 
-## Result
-* They find that modern machine learning exhibit an additional regime beyond the standard U curve and call it double descent
+# Implicit regularization
+In [Barrett, Dherin (2020)](https://arxiv.org/abs/2009.11162) they argue that stochastic gradient descent has a hidden regularization mechanism. Their argument is roughly:
+1. Gradient descent iterations have a finite step size/learning rate and thus one does not follow the actual gradient flow but an effective one "overshooting" at every iteration step.
+2. What is the loss function of which the actual gradient flow corresponds to this effective flow?
+3. They show that the gradient corresponds to a loss which is the original loss $E(\theta)$ with a correction term *proportional to gradient of the loss* 
+$$
+E_{eff}(\theta) = E(\theta) + \lambda E_{corr}(\theta)
+$$ 
+with $E_{corr}(\theta) = {\frac{1}{m}\sum_{i}^{m}(\nabla_{\theta_i}E(\theta))^2}$ and $\lambda = \frac{hm}{4}$ where $h$ is the step size and $m$ the number of parameters.
 
-![](2022-09-25-11-17-02.png)
+This means that gradient descent actually seeks out solutions in flatter regions of the loss landscape as local minima in hilly regions have a higher loss due to the correction term. This might explain why networks initialized totally differently converge to similar solutions. They then argue that this is the reason why gradient descent seeks out more generalizable solutions because flatter minimas are apparently known empirically to have better generalization properties as suggested by the following measurements
+|![](2022-10-04-16-05-09.png)|
+|:--:|
+|In the left figure we see the different values for $E_{corr}$ as a function of $\lambda$ and on the right figure we see the corresponding test accuracy for the different models. Lower values of $E_{corr}$ (and thus flatter minimas) are found to correlate with better accuracy on the test score*[Source](https://arxiv.org/abs/2009.11162)*|
 
-The interpolation threshold occurs at $N \approx n*k$ where $N$ denotes the number of model parameters, $n$ the number of traninig samples and $k$ the number of classes in a classification task.
-* In the "modern" regime the search space includeds a lot of solutions to fit the training set perfectly, nonetheless we find that models in this regime are able to generalize reasonably well while maintiaing low loss on the training data
-* They argue that this happens due to some implicit regularization, in particular that optimization in high parameter regime seeks out solutions with low $l2$ on the weights (see below figure).
-* "*For the classes HN that we consider, there is no guarantee that the most regular, smallest norm predictor consistent with training data (namely hn,∞, which is in H∞) is contained in the class HN for any finite N. But increasing N allows us to construct progressively better approximations to that smallest norm function. Thus we expect to have learned predictors with largest norm at the interpolation threshold and for the norm of hn,N to decrease monotonically as N increases thus explaining the second descent segment of the curve.*"
-
-![](2022-09-25-11-21-40.png)
-
-# Questions
-* Why do lower norm solutions generalize better? I.e. What is the mathematical version of Okhams razor
-* How exactly does this seeking of lower norm solutions happen, why dont we see ourselves stuck in random local minima?
-
-The above observation has been generalized across tasks, models and optimization procedures [here](https://arxiv.org/pdf/1912.02292.pdf). They define an effective model complexity as the maximum number of training samples that can be fitted to near-zero loss. They are able to also show a double-descent behaviour while keeping model complexity fixed and increasing training time
-![](2022-09-26-14-45-00.png)
-
-Note that the effective model complexity reduces when we introduce more traiing samples. This means that in certain scenarios the introduction of addtional training samples acctually degrades the performance for a given model as the interpolation threshhold (effective model complexity $\approx$ number of samples) is shifted to the right
-
-![](2022-09-26-15-13-39.png)
-
-What gives rise to this phenomenon though? One possible intution is that at the interpolation threshold we only have one model which is able to fit the training model perfectly while beyond the interpolation threshold there is room to select from a lot of models which fit the training perfectly while still conserving global features which are necessary for generalization to unseen data. How are these specific solutions seeked out though as all of them should have the same emperical risk i.e. loss on the training set?
-
-One way of answering is that SGD has an implicit regularization term. In https://arxiv.org/abs/2009.11162 they show that in fact due to the discrete steps taken in gradient descent, the actual gradient which is being followed is the one of the loss + a term which is quadratically dependent on the gradient of the loss. So what happens is that besides minimizing the loss we also seek out flat regions of the loss landscape. "Empirically" it is known that these regions generalize better. Furthermore, as flat regions are robust to pertubations, this might also explain why networks which are initalized differently converge more or less to a similair loss.
-
+What is the relationship between the geometry of a given minimum and the generalizability of the associated solution though? 
+One common principle which is often evoked is that of Occam Razor, the philosophical idea that if multiple models describe the same phenomenon, then one should pick the one which is simpler. What do we mean with "simpler" though? From the discussion so far, the number of parameters does not seem to be the right way to define simplicity as otherwise we would expect the model at the interpolation threshold to generalize best. In the case of [Belkin et al. (2018)](https://arxiv.org/abs/1812.11118), where they first illustrated the exitence of the double-descent phenomenon using Kernel methods, "simpler" means a lower norm on the sum of parameter values $\min_{M_{\theta^*}\in M_\theta} \sum_i\|{\theta_i}\|$.
