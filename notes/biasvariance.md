@@ -10,19 +10,19 @@ So,
 
 # Bias and Variance
 The goal of machine learning or statistical learning theory is to approximate an unknown distribution $M^*$ using a finite set of training data sampled from $M^*$. Different approaches usually differ in the choice of the function space $M_{\theta}$ one uses to search for a candidate model and how one defines the distance measure which determines what is considered a good fit.
-|![](2022-09-30-11-59-12.png)|
+|![](../media/biasvariance/2022-09-30-11-59-12.png)|
 |:--:| 
 | *Schematic illustration of a situation where the function space is not expressive enough to model the true distribution $M^*$. The closest approximation $M^*_{\theta}$ is found via optimization methods starting at some initial choice of model parameters $M_{\theta_0}$. [Source](https://mml-book.github.io/)* |
 
 The "textbook" understanding is that the complexity of the model used to approximate the true distribution needs to be "just right". If there are too few free parameters in the model, no matter how you tune the parameters, the predictive power of the model will be too limited i.e we are under-fitting. On the other end, if there are too many parameters, we are able to perfectly fit every sample in the training data at the cost of generalization as we are also fitting noise i.e. we are over-fitting. Note furthermore, that in the latter case there is not a unique solution and there are many possible ways to fit the training data perfectly. 
 The following figure illustrates these different scenarios using n-degree polynomials as $M_{\theta}$ 
-|![](2022-09-30-19-28-09.png)|
+|![](../media/biasvariance/2022-09-30-19-28-09.png)|
 |:--:|
 |*[Source](https://mml-book.github.io/)*|
 
 These three regimes are summarised in more general way in the following figure
 
-|![](2022-09-30-19-43-56.png)|
+|![](../media/biasvariance/2022-09-30-19-43-56.png)|
 |:--:|
 |Schematic depiction of how the loss on training and test set scales as a function of model complexity ($\mathcal{H}$ here corresponds to $M_{\theta}$ above). The the "sweet spot" depicts the point where the model complexity is "just right". Before this point an increase of the model complexity goes along with a decrease on train error *and* test error. After the "sweet spot", the model starts to learn the training data "by heart" at the cost of generalization which is reflected by an increase of the error on the test set.  *[Source](https://arxiv.org/abs/1812.11118)*|
 
@@ -33,7 +33,7 @@ Given this conventional understanding of how model complexity is expected to inf
 # Double-descent phenomenon
 In [Belkin et al. (2018)](https://arxiv.org/abs/1812.11118) the authors study the above discussed phenomenon systematically using primarily Kernel-based methods ([Random Fourier Features](https://gregorygundersen.com/blog/2019/12/23/random-fourier-features/) in particular) and they propose an extension of the classical picture to an *over-parameterized* regime
 
-|![](2022-09-25-11-17-02.png)|
+|![](../media/biasvariance/2022-09-25-11-17-02.png)|
 |:--:|
 |Extension of classical bias-variance picture to a "modern" over-parameterized regime. The interpolation threshold corresponds to the point where the model complexity matches the number of training samples. *[Source](https://arxiv.org/abs/1812.11118)*|
 
@@ -46,17 +46,17 @@ The double-descent phenomenon is studied in more generality in [Nakkiran et al. 
 
 With this notion of complexity, we expect to see a double-descent phenomenon along the dimension of model complexity as in number of parameters but also along the dimension of training time.
 
-|![](2022-10-03-20-13-27.png)|
+|![](../media/biasvariance/2022-10-03-20-13-27.png)|
 |:--:|
 |Experimental observation of the double descent phenomenon using CIFAR-10 on ResNet18 with varying width. The critical regime (orange) denotes a kind of 'potential barrier': If you find yourself in the minimum of the test error in the classical regime, increasing the number of parameters of your model will hurt your generalization performance while you are in this region. Furthermore, note that early stopping only makes sense for a given range of width values. *[Source](https://arxiv.org/abs/1912.02292)*|
 
-|![](2022-10-03-20-24-59.png)|
+|![](../media/biasvariance/2022-10-03-20-24-59.png)|
 |:--:|
 |Experimental observation of the double descent phenomenon along the training time dimension *[Source](https://arxiv.org/abs/1912.02292)*|
 
 Note that a corollary of the observed EMC scaling behaviour is that in certain regimes adding more data actually **hurts** your generalization performance! To see this, remember that EMC is defined as the number of training samples which can be exactly fitted. If we increase the number of training samples we consequently shift the interpolation threshold to the right, which will in some cases mean worse test error compared to a curve corresponding to a smaller train set.
 
-|![](2022-10-03-20-32-40.png)|
+|![](../media/biasvariance/2022-10-03-20-32-40.png)|
 |:--:|
 |Two different test loss as a function of embedding dimension (which corresponds to model complexity as in number of parameters) on a transformer model. The two curves differ in the number of training samples and illustrate a surprising case where increase training set size leads to worse test performance*[Source](https://arxiv.org/abs/1912.02292)*|
 
@@ -77,7 +77,7 @@ $$
 with $E_{corr}(\theta) = {\frac{1}{m}\sum_{i}^{m}(\nabla_{\theta_i}E(\theta))^2}$ and $\lambda = \frac{hm}{4}$ where $h$ is the step size and $m$ the number of parameters.
 
 This means that gradient descent actually seeks out solutions in flatter regions of the loss landscape as local minima in hilly regions have a higher loss due to the correction term. This might explain why networks initialized totally differently converge to similar solutions. They then argue that this is the reason why gradient descent seeks out more generalizable solutions because flatter minimas are apparently known empirically to have better generalization properties as suggested by the following measurements
-|![](2022-10-04-16-05-09.png)|
+|![](../media/biasvariance/2022-10-04-16-05-09.png)|
 |:--:|
 |In the left figure we see the different values for $E_{corr}$ as a function of $\lambda$ and on the right figure we see the corresponding test accuracy for the different models. Lower values of $E_{corr}$ (and thus flatter minimas) are found to correlate with better accuracy on the test score*[Source](https://arxiv.org/abs/2009.11162)*|
 
